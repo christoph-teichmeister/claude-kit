@@ -886,7 +886,10 @@ let crabFrame = 0
 let crabTimer: { cancel: () => void } | null = null
 
 async function animateCrabs($: EngineInterface): Promise<void> {
-  if (crabTimer || (await $.settings.read()).prefersReducedMotion === true) return
+  if (crabTimer) return
+  // No settings (tests, headless runs): animate.
+  const settings = await $.settings.read().catch(() => ({}) as Record<string, unknown>)
+  if (settings.prefersReducedMotion === true) return
   crabTimer = $.clock.every(250, () => {
     void (async () => {
       const running = (await read($, agents)).filter(a => a.status === 'running')
